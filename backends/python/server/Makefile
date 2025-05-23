@@ -15,11 +15,11 @@ gen-server:
 
 install: gen-server
 	pip install pip --upgrade
-	pip install -r requirements.txt
+	pip install -r requirements.txt --ignore-installed
 	pip install -e .
 
 run-dev:
-	python text_embeddings_server/cli.py serve BAAI/bge-small-en
+	python text_embeddings_server/cli.py BAAI/bge-small-en
 
 export-requirements:
 	poetry export -o requirements.txt --without-hashes

@@ -1,5 +1,7 @@
 import asyncio
 import torch
+import torch_npu
+import os
 
 from grpc import aio
 from loguru import logger
@@ -13,6 +15,8 @@ from text_embeddings_server.pb import embed_pb2_grpc, embed_pb2
 from text_embeddings_server.utils.tracing import UDSOpenTelemetryAioServerInterceptor
 from text_embeddings_server.utils.interceptor import ExceptionInterceptor
 
+
+clean_npu_cache = os.getenv("CLEAN_NPU_CACHE", "False")
 
 class EmbeddingService(embed_pb2_grpc.EmbeddingServiceServicer):
     def __init__(self, model: Model):
@@ -29,14 +33,35 @@ class EmbeddingService(embed_pb2_grpc.EmbeddingServiceServicer):
         batch = self.model.batch_type.from_pb(request, self.model.device)
 
         embeddings = self.model.embed(batch)
-
+        if clean_npu_cache == "True":
+            torch_npu.npu.empty_cache()
+            
         return embed_pb2.EmbedResponse(embeddings=embeddings)
+    
+    async def Embed_all(self, request, context):
+        batch = self.model.batch_type.from_pb(request, self.model.device)
+
+        embeddings = self.model.embed_all(batch)
+        if clean_npu_cache == "True":
+            torch_npu.npu.empty_cache()
+            
+        return embed_pb2.RawEmbedResponse(allembeddings=embeddings)
+    
+    async def Predict(self, request, context):
+        batch = self.model.batch_type.from_pb(request, self.model.device)
+
+        predictions = self.model.predict(batch)
+        if clean_npu_cache == "True":
+            torch_npu.npu.empty_cache()
+            
+        return embed_pb2.PredictResponse(predictions=predictions)
 
 
 def serve(
     model_path: Path,
     dtype: Optional[str],
     uds_path: Path,
+    pool: str,
 ):
     async def serve_inner(
         model_path: Path,
@@ -45,7 +70,7 @@ def serve(
         unix_socket = f"unix://{uds_path}"
 
         try:
-            model = get_model(model_path, dtype)
+            model = get_model(model_path, dtype, pool)
         except Exception:
             logger.exception("Error when initializing model")
             raise

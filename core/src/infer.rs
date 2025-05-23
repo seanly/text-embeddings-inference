@@ -37,11 +37,6 @@ impl Infer {
             notify_batching_task.clone(),
             embed_sender.clone(),
         ));
-        tokio::spawn(batching_task(
-            queue.clone(),
-            notify_batching_task.clone(),
-            embed_sender,
-        ));
 
         // Create embed task to communicate with backend
         tokio::spawn(backend_task(backend.clone(), embed_receiver));

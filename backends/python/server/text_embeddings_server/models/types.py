@@ -5,7 +5,7 @@ from dataclasses import dataclass
 from opentelemetry import trace
 
 from text_embeddings_server.pb import embed_pb2
-from text_embeddings_server.pb.embed_pb2 import Embedding
+from text_embeddings_server.pb.embed_pb2 import Embedding, Prediction, TokenEmbedding
 
 tracer = trace.get_tracer(__name__)
 
@@ -27,6 +27,7 @@ class PaddedBatch(Batch):
     token_type_ids: torch.Tensor
     position_ids: torch.Tensor
     attention_mask: torch.Tensor
+    max_length: int
 
     @classmethod
     @tracer.start_as_current_span("from_pb")
@@ -35,6 +36,7 @@ class PaddedBatch(Batch):
         all_tensors = torch.zeros(
             [4, len(pb.cu_seq_lengths) - 1, pb.max_length], dtype=torch.int32
         )
+        max_length=pb.max_length
 
         for i, start_index in enumerate(pb.cu_seq_lengths[:-1]):
             end_index = pb.cu_seq_lengths[i + 1]
@@ -59,6 +61,7 @@ class PaddedBatch(Batch):
             token_type_ids=all_tensors[1],
             position_ids=all_tensors[2],
             attention_mask=all_tensors[3],
+            max_length=max_length,
         )
 
     def __len__(self):

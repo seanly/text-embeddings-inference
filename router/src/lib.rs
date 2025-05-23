@@ -188,6 +188,10 @@ pub async fn run(
         {
             DType::Float16
         }
+        #[cfg(any(feature = "accelerate", feature = "mkl", feature = "mkl-dynamic"))]
+        {
+            DType::BFloat16
+        }
     });
 
     // Create backend
@@ -307,7 +311,7 @@ fn get_backend_model_type(
     pooling: Option<text_embeddings_backend::Pool>,
 ) -> Result<text_embeddings_backend::ModelType> {
     for arch in &config.architectures {
-        if Some(text_embeddings_backend::Pool::Splade) == pooling && arch.ends_with("MaskedLM") {
+        if Some(text_embeddings_backend::Pool::Splade) == pooling && (arch.ends_with("MaskedLM") || arch.ends_with("RobertaModel")) {
             return Ok(text_embeddings_backend::ModelType::Embedding(
                 text_embeddings_backend::Pool::Splade,
             ));

@@ -20,7 +20,7 @@ loguru = "^0.6.0"
 opentelemetry-api = "^1.15.0"
 opentelemetry-exporter-otlp = "^1.15.0"
 opentelemetry-instrumentation-grpc = "^0.36b0"
-torch = { version = "^2.0.1" }
+torch = { version = "^2.1.0" }
 
 [tool.poetry.extras]
 
@@ -29,9 +29,9 @@ grpcio-tools = "^1.51.1"
 pytest = "^7.3.0"
 
 [[tool.poetry.source]]
-name = "pytorch-gpu-src"
-url = "https://download.pytorch.org/whl/cu118"
-priority = "explicit"
+name = "mirrors"
+url = "https://pypi.tuna.tsinghua.edu.cn/simple/"
+priority = "default"
 
 [tool.pytest.ini_options]
 markers = ["private: marks tests as requiring an admin hf token (deselect with '-m \"not private\"')"]

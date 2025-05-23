@@ -12,7 +12,7 @@ from opentelemetry import trace
 import dropout_layer_norm
 
 from text_embeddings_server.models import Model
-from text_embeddings_server.models.types import FlashBatch, Embedding
+from text_embeddings_server.models.types import FlashBatch, Embedding, Prediction, TokenEmbedding
 from text_embeddings_server.utils.flash_attn import attention
 
 tracer = trace.get_tracer(__name__)
@@ -251,3 +251,12 @@ class FlashBert(Model):
             )
             for i in range(len(batch))
         ]
+    
+    @tracer.start_as_current_span("embed_all")
+    def embed_all(self, batch: FlashBatch) -> List[TokenEmbedding]:
+        print("flashbert model is not support embed_all")
+
+    @tracer.start_as_current_span("predict")
+    def predict(self, batch: PaddedBatch) -> List[Prediction]:
+        print("embedding model is not support predict")
+    

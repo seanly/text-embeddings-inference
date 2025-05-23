@@ -23,6 +23,7 @@ def serve(
     logger_level: str = "INFO",
     json_output: bool = False,
     otlp_endpoint: Optional[str] = None,
+    pool: str = "cls",
 ):
     # Remove default handler
     logger.remove()
@@ -47,7 +48,7 @@ def serve(
     # Downgrade enum into str for easier management later on
     dtype = None if dtype is None else dtype.value
 
-    server.serve(model_path, dtype, uds_path)
+    server.serve(model_path, dtype, uds_path, pool)
 
 
 if __name__ == "__main__":
